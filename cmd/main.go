@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/go-gota/gota/dataframe"
 	"github.com/gocarina/gocsv"
+	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 )
 
 type application struct {
