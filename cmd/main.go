@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gocarina/gocsv"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
+	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models/file"
 	"log"
 	"net/http"
 	"os"
@@ -12,15 +13,15 @@ import (
 )
 
 type application struct {
-	errorLog		*log.Logger
-	infoLog			*log.Logger
-	contracts		*file.ContractModel
-	config			config
+	errorLog  *log.Logger
+	infoLog   *log.Logger
+	contracts *file.ContractModel
+	config    config
 }
 
 type config struct {
-	port	int
-	env		string
+	port int
+	env  string
 }
 
 func main() {
@@ -36,36 +37,6 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Open Database Connection
-	contractDB, err := openFile()
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-
-	// Start App
-	app := &application{
-		config: 			cfg,
-		errorLog:			errorLog,
-		infoLog:			infoLog,
-		contracts:			&file.ContractModel{DB: contractDB},
-	}
-
-	// Start Server
-	srv := &http.Server{
-		Addr: 			fmt.Sprintf(":%d", cfg.port),
-		ErrorLog:		errorLog,
-		Handler:		app.routes(),
-		IdleTimeout:	time.Minute,
-		ReadTimeout:	10 * time.Second,
-		WriteTimeout:	30 * time.Second,
-	}
-
-	infoLog.Printf("Starting server on %s", srv.Addr)
-	err = srv.ListenAndServe()
-	errorLog.Fatal(err)
-
-}
-
-func openFile() ([]*models.contracts, error){
 	f, err := os.Open("data.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -73,10 +44,29 @@ func openFile() ([]*models.contracts, error){
 	defer f.Close()
 
 	contractDB := []models.Contract{}
-
 	if err := gocsv.UnmarshalFile(f, &contractDB); err != nil {
-		return _, err
+		panic(err)
 	}
 
-	return contractDB, _
+	// Start App
+	app := &application{
+		config:    cfg,
+		errorLog:  errorLog,
+		infoLog:   infoLog,
+		contracts: &file.ContractModel{DB: &contractDB},
+	}
+
+	// Start Server
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.port),
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
+
+	infoLog.Printf("Starting server on %s", srv.Addr)
+	err = srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
