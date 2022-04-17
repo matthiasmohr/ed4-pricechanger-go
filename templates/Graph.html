@@ -1,0 +1,58 @@
+{{ define "Graph" }}
+{{ template "Header" }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Amount of Products</h3>
+            <div id="grafik_1" style="width: 100%;min-height:400px;"></div>
+            <script type="text/javascript">
+                $( document ).ready(function() {
+                    var chartDom = document.getElementById('grafik_1');
+                    var myChart = echarts.init(chartDom);
+                    var option;
+
+                    option = {
+                        tooltip: {
+                            trigger: 'item'
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            left: 'left'
+                        },
+                        series: [
+                            {
+                                name: 'Product',
+                                type: 'pie',
+                                radius: '50%',
+                                data: [
+                                    {{ $data := .}}
+                                    {{range $key, $val := (index .Product_name)}}
+                                        {value: {{ index $data.Rohmarge_COUNT $key }}, name: {{$val}} },
+                                    {{end}}
+                                ],
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    option && myChart.setOption(option);
+                })
+            </script>
+        </div>
+        <div class="col-md-6">
+            <h3>Grafik 2</h3>
+        </div>
+    </div>
+</div>
+{{ template "Footer" }}
+
+
+
+
+{{ end }}
