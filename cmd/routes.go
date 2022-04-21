@@ -6,7 +6,7 @@ import (
 )
 
 func (app *application) routes() http.Handler {
-	mux := mux.NewRouter().StrictSlash(true)
+	mux := mux.NewRouter()
 
 	// JSON response
 	//mux.HandleFunc("/v1/products", app.createKreditangebotHandler).Methods("POST")
@@ -17,15 +17,17 @@ func (app *application) routes() http.Handler {
 	//mux.HandleFunc("/v1/tools/list", app.indexJSON)
 
 	// WEB Response
-	mux.HandleFunc("/", app.indexWebHandler)
+	mux.HandleFunc("/", app.homeWebHandler)
 	mux.HandleFunc("/produktverteilung", app.produktverteilungWebHandler)
 	mux.HandleFunc("/renditenhistogramm", app.renditenhistogrammWebHandler)
+	mux.HandleFunc("/renditevspreis", app.renditevspreisWebHandler)
+	mux.HandleFunc("/renditevslaufzeit", app.renditevslaufzeitWebHandler)
 
 	// Misc
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public", fileServer))
 
 	return mux
 }
