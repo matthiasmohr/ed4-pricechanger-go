@@ -37,13 +37,13 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Open Database Connection
-	f, err := os.Open("data.csv")
+	f, err := os.Open("data_afsr.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	contractDB := []models.Contract{}
+	var contractDB []models.Contract
 	if err := gocsv.UnmarshalFile(f, &contractDB); err != nil {
 		panic(err)
 	}
