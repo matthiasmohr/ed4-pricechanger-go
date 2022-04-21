@@ -18,8 +18,8 @@ func (app *application) routes() http.Handler {
 
 	// WEB Response
 	mux.HandleFunc("/", app.indexWebHandler)
-	mux.HandleFunc("/graph", app.graphWebHandler)
-	mux.HandleFunc("/graph2", app.graph2WebHandler)
+	mux.HandleFunc("/produktverteilung", app.produktverteilungWebHandler)
+	mux.HandleFunc("/renditenhistogramm", app.renditenhistogrammWebHandler)
 
 	// Misc
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)

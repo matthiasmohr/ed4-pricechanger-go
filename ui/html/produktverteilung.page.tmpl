@@ -2,9 +2,9 @@
 <main>
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h3>Amount of Products</h3>
-                <div id="grafik_1" style="width: 100%;min-height:400px;"></div>
+                <div id="grafik_1" style="width: 100%;min-height:700px;"></div>
                 <script type="text/javascript">
                     $( document ).ready(function() {
                         var chartDom = document.getElementById('grafik_1');
@@ -16,14 +16,21 @@
                                 trigger: 'item'
                             },
                             legend: {
+                                type: 'scroll',
                                 orient: 'vertical',
-                                left: 'left'
+                                right: 10,
+                                top: 20,
+                                bottom: 20
                             },
                             series: [
                                 {
                                     name: 'Product',
                                     type: 'pie',
-                                    radius: '50%',
+                                    radius: '80%',
+                                    center: ['30%', '50%'],
+                                    label: {
+                                        show: false
+                                    },
                                     data: [
                                         {{ $data := .}}
                                         {{range $key, $val := (index .Product_name)}}
@@ -44,9 +51,6 @@
                         option && myChart.setOption(option);
                     })
                 </script>
-            </div>
-            <div class="col-md-6">
-                <h3>Grafik 2</h3>
             </div>
         </div>
     </div>
