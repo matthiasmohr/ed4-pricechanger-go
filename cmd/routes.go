@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	//mux.HandleFunc("/v1/tools/{id}", app.deleteTool).Methods("DELETE")
 	mux.HandleFunc("/v1/contract/{id}", app.showContractHandler).Methods("GET")
 	//mux.HandleFunc("/v1/tools/list", app.indexJSON)
+	mux.HandleFunc("/v1/contractCharts", app.showChartHandler).Methods("GET")
 
 	// WEB Response
 	mux.HandleFunc("/", app.homeWebHandler)

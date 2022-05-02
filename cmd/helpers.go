@@ -99,9 +99,9 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 // Define a writeJSON() helper for sending responses. This takes the destination
 // http.ResponseWriter, the HTTP status code to send, the data to encode to JSON, and a
 // header map containing any additional HTTP headers we want to include in the response.
-func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
+func (app *application) writeJSON(w http.ResponseWriter, status int, tojsonfy envelope, headers http.Header) error {
 	// Encode the data to JSON, returning the error if there was one.
-	js, err := json.MarshalIndent(data, "", "\t")
+	js, err := json.MarshalIndent(tojsonfy, "", "\t")
 	if err != nil {
 		return err
 	}
@@ -117,6 +117,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	// Add the "Content-Type: application/json" header, then write the status code and
 	// JSON response.
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	w.Write(js)
 
