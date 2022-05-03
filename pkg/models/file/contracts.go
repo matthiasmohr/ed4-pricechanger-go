@@ -26,13 +26,13 @@ func (c *ContractModel) Get(id int) (*models.Contract, error) {
 func (c *ContractModel) AnalyseByProducts() ([]map[string]interface{}, map[string][]interface{}, error) {
 	df := dataframe.LoadStructs(*c.DB)
 	//fmt.Println(df.Col("Rohmarge").Quantile(0.1))
-	groups := df.GroupBy("Product_name")
+	groups := df.GroupBy("ProductName")
 	aggre := groups.Aggregation([]dataframe.AggregationType{
 		dataframe.Aggregation_MAX,
 		dataframe.Aggregation_MEAN,
 		dataframe.Aggregation_MIN,
 		dataframe.Aggregation_COUNT},
-		[]string{"Rohmarge", "Rohmarge", "Rohmarge", "Rohmarge"})
+		[]string{"KwhRohmarge", "KwhRohmarge", "KwhRohmarge", "KwhRohmarge"})
 
 	outputMap := aggre.Maps()
 

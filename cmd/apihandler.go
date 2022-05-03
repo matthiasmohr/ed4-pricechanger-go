@@ -21,7 +21,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 
 func (app *application) showContractHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
-	if err != nil || id < 1 {
+	if err != nil || id < 0 {
 		app.notFoundResponse(w, r)
 		return
 	}
