@@ -26,6 +26,12 @@ func (app *application) readIDParam(r *http.Request) (int, error) {
 	return id, nil
 }
 
+func (app *application) readIDStringParam(r *http.Request) (string, error) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+	return key, nil
+}
+
 func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	// Use http.MaxBytesReader() to limit the size of the request body to 1MB.
 	maxBytes := 1_048_576

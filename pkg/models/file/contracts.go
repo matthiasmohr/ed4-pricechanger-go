@@ -19,11 +19,25 @@ func (c *ContractModel) Index() (*[]models.Contract, error) {
 	return &result, nil
 }
 
-func (c *ContractModel) Get(id int) (*models.Contract, error) {
-	return &(*c.DB)[id], nil
+func (c *ContractModel) Get(id string) (*models.Contract, error) {
+	for _, v := range *c.DB {
+		if v.ProductSerialNumber == id {
+			return &v, nil
+		}
+	}
+	return nil, models.ErrNoRecord
 }
 
-func (c *ContractModel) AnalyseByProducts() ([]map[string]interface{}, map[string][]interface{}, error) {
+func (c *ContractModel) Put(id string) (*models.Contract, error) {
+	for _, v := range *c.DB {
+		if v.ProductSerialNumber == id {
+			return &v, nil
+		}
+	}
+	return nil, models.ErrNoRecord
+}
+
+func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, map[string][]interface{}, error) {
 	df := dataframe.LoadStructs(*c.DB)
 	//fmt.Println(df.Col("Rohmarge").Quantile(0.1))
 	groups := df.GroupBy("ProductName")
@@ -32,7 +46,7 @@ func (c *ContractModel) AnalyseByProducts() ([]map[string]interface{}, map[strin
 		dataframe.Aggregation_MEAN,
 		dataframe.Aggregation_MIN,
 		dataframe.Aggregation_COUNT},
-		[]string{"KwhRohmarge", "KwhRohmarge", "KwhRohmarge", "KwhRohmarge"})
+		[]string{aggregator, aggregator, aggregator, aggregator})
 
 	outputMap := aggre.Maps()
 

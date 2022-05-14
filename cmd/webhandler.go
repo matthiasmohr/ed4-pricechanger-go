@@ -22,7 +22,7 @@ func (app *application) homeWebHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) produktverteilungWebHandler(w http.ResponseWriter, r *http.Request) {
-	_, c, err := app.contracts.AnalyseByProducts()
+	_, c, err := app.contracts.Aggregate("CurrentBasePriceNet")
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
