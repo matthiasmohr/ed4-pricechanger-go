@@ -82,3 +82,29 @@ func (app *application) aggregateHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
 	}
 }
+
+func (app *application) describeHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := app.contracts.Describe()
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"describeContracts": c}, nil)
+	if err != nil {
+		app.errorLog.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
+}
+
+func (app *application) quantileHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := app.contracts.Quantile(100, "OrigBaseCosts")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"quantile": c}, nil)
+	if err != nil {
+		app.errorLog.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
+}

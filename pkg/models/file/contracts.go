@@ -65,3 +65,24 @@ func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, 
 	// TODO: Error Catching
 	return outputMap, transposedVectors, nil
 }
+
+func (c *ContractModel) Describe() ([]map[string]interface{}, error) {
+	df := dataframe.LoadStructs(*c.DB)
+	df2 := df.Describe()
+	outputMap := df2.Maps()
+
+	// TODO: Error Catching
+	return outputMap, nil
+}
+
+func (c *ContractModel) Quantile(n int, column string) ([]float64, error) {
+	df := dataframe.LoadStructs(*c.DB)
+	var array []float64
+	for i := 1; i < n; i++ {
+		quantile := df.Col(column).Quantile(1 / float64(n))
+		array = append(array, quantile)
+	}
+
+	// TODO: Error Catching
+	return array, nil
+}
