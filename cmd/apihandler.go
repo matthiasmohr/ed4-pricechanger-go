@@ -49,7 +49,7 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	c, err := app.contracts.Put(id)
+	c, err := app.contracts.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFoundResponse(w, r)
@@ -58,7 +58,32 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"contract": c}, nil)
+	var input struct {
+		NewPriceInclude   bool    `json:"NewPriceInclude"`
+		NewPriceBase      float64 `json:"NewPriceBase"`
+		NewPriceKwh       float64 `json:"NewPriceKwh"`
+		NewPriceStartdate string  `json:"NewPriceStartdate"`
+	}
+
+	// Read the JSON request body data into the input struct.
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	// Copy the values from the request body to the appropriate fields of the contract
+	c.NewPriceInclude = input.NewPriceInclude
+	c.NewPriceBase = input.NewPriceBase
+	c.NewPriceKwh = input.NewPriceKwh
+	c.NewPriceStartdate = input.NewPriceStartdate
+
+	cNew, err := app.contracts.Update(c)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"contract": cNew}, nil)
 	if err != nil {
 		app.errorLog.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)

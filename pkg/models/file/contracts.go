@@ -28,9 +28,10 @@ func (c *ContractModel) Get(id string) (*models.Contract, error) {
 	return nil, models.ErrNoRecord
 }
 
-func (c *ContractModel) Put(id string) (*models.Contract, error) {
+func (c *ContractModel) Update(d *models.Contract) (*models.Contract, error) {
 	for _, v := range *c.DB {
-		if v.ProductSerialNumber == id {
+		if v.ProductSerialNumber == d.ProductSerialNumber {
+			v.ProductName = "AAAAAAAAAAA"
 			return &v, nil
 		}
 	}
