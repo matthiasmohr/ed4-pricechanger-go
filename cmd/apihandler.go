@@ -66,7 +66,7 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) aggregateHandler(w http.ResponseWriter, r *http.Request) {
-	aggregator := "CurrentBasePriceNet"
+	aggregator := "CurrentKwhRohmarge"
 	c, t, err := app.contracts.Aggregate(aggregator)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
