@@ -51,6 +51,14 @@ func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, 
 
 	outputMap := aggre.Maps()
 
+	// Rename Keys for Client simplicity purpose
+	for i, _ := range outputMap {
+		outputMap[i]["COUNT"] = outputMap[i][aggregator+"_COUNT"]
+		outputMap[i]["MAX"] = outputMap[i][aggregator+"_MAX"]
+		outputMap[i]["MEAN"] = outputMap[i][aggregator+"_MEAN"]
+		outputMap[i]["MIN"] = outputMap[i][aggregator+"_MIN"]
+	}
+
 	// Transpose records and convert to map of Type
 	records := aggre.Records()
 	// map[Product_name:[ELECTRICITY_SUBSCRIPTION_24 ELECTRICITY_SUBSCRIPTION_12] Rohmarge_COUNT:[3.000000 1497.000000] Rohmarge_MAX:[0.147761 26.200000] Rohmarge_MEAN:[0.142167 0.171183] Rohmarge_MIN:[0.136481 0.108396]]
@@ -69,8 +77,8 @@ func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, 
 
 func (c *ContractModel) Describe() ([]map[string]interface{}, error) {
 	df := dataframe.LoadStructs(*c.DB)
-	df2 := df.Describe()
-	outputMap := df2.Maps()
+	dfDescribe := df.Describe()
+	outputMap := dfDescribe.Maps()
 
 	// TODO: Error Catching
 	return outputMap, nil
