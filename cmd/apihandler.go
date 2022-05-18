@@ -127,7 +127,13 @@ func (app *application) describeHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) quantileHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := app.contracts.Quantile(100, "OrigBaseCosts")
+	kpi, err := app.readIDStringParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	c, err := app.contracts.Quantile(100, kpi)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

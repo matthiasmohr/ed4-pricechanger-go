@@ -18,7 +18,7 @@ func (app *application) routes() http.Handler {
 	//mux.HandleFunc("/v1/tools/list", app.indexJSON)
 	mux.HandleFunc("/v1/describeContracts", app.describeHandler).Methods("GET")
 	mux.HandleFunc("/v1/aggregateContracts/{id}", app.aggregateHandler).Methods("GET")
-	mux.HandleFunc("/v1/quantileContracts", app.quantileHandler).Methods("GET")
+	mux.HandleFunc("/v1/quantileContracts/{id}", app.quantileHandler).Methods("GET")
 
 	// WEB Response
 	mux.HandleFunc("/", app.homeWebHandler)
