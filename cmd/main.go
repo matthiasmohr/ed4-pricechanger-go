@@ -43,9 +43,13 @@ func main() {
 	}
 	defer f.Close()
 
+	// Parse File into Contract Slice and Calculate Total Prices
 	var contractDB []models.Contract
 	if err := gocsv.UnmarshalFile(f, &contractDB); err != nil {
 		panic(err)
+	}
+	for i, _ := range contractDB {
+		contractDB[i].CalculateTotalPrices()
 	}
 
 	// Start App
@@ -53,7 +57,7 @@ func main() {
 		config:    cfg,
 		errorLog:  errorLog,
 		infoLog:   infoLog,
-		contracts: &file.ContractModel{DB: &contractDB},
+		contracts: &file.ContractModel{DB: contractDB},
 	}
 
 	// Start Server

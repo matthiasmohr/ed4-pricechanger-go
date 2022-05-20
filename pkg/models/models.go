@@ -39,9 +39,22 @@ type Contract struct {
 	BaseNewPriceProposed float64 //currentCost + origMargin
 	KwhNewPriceProposed  float64 //currentCost + origMargin
 
+	// Total Prices
+	OrigTotalCosts        float64
+	CurrentTotalPriceNet  float64
+	TotalNewPriceProposed float64
+	NewPriceTotal         float64
+
 	// Price Change info
 	NewPriceInclude   bool
 	NewPriceBase      float64
 	NewPriceKwh       float64
 	NewPriceStartdate string // date
+}
+
+func (c *Contract) CalculateTotalPrices() {
+	c.OrigTotalCosts = c.OrigBaseCosts + c.OrigKwhCosts*c.AnnualConsumption
+	c.CurrentTotalPriceNet = c.CurrentBasePriceNet + c.CurrentKwhPriceNet*c.AnnualConsumption
+	c.TotalNewPriceProposed = c.BaseNewPriceProposed + c.KwhNewPriceProposed*c.AnnualConsumption
+	c.NewPriceTotal = c.NewPriceBase + c.NewPriceKwh*c.AnnualConsumption
 }
