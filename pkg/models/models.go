@@ -43,12 +43,12 @@ type Contract struct {
 	OrigTotalCosts        float64
 	CurrentTotalPriceNet  float64
 	TotalNewPriceProposed float64
-	NewPriceTotal         float64
 
 	// Price Change info
 	NewPriceInclude   bool
 	NewPriceBase      float64
 	NewPriceKwh       float64
+	NewPriceTotal     float64
 	NewPriceStartdate string // date
 }
 
