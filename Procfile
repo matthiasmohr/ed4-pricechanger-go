@@ -1,1 +1,1 @@
-web: /bin/cmd -port=$PORT
+web: bin/cmd -port=$PORT
