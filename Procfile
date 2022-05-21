@@ -1,0 +1,1 @@
+web: bin/ed4-pricechanger-go
