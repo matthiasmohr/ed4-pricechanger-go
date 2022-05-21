@@ -1,1 +1,1 @@
-web: ed4-pricechanger-go -port=$PORT
+web: /bin/cmd -port=$PORT
