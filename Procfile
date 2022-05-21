@@ -1,1 +1,1 @@
-web: bin/ed4-pricechanger-go -port=$PORT
+web: ed4-pricechanger-go -port=$PORT
