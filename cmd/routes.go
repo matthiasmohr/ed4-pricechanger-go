@@ -7,6 +7,7 @@ import (
 
 func (app *application) routes() http.Handler {
 	mux := mux.NewRouter()
+	mux.Use(CORS)
 
 	// JSON response
 	//mux.HandleFunc("/v1/products", app.createKreditangebotHandler).Methods("POST")
@@ -14,7 +15,7 @@ func (app *application) routes() http.Handler {
 	//mux.HandleFunc("/v1/tools/new", app.createToolForm)
 	//mux.HandleFunc("/v1/tools/{id}", app.deleteTool).Methods("DELETE")
 	mux.HandleFunc("/v1/contract/{id}", app.showContractHandler).Methods("GET")
-	mux.HandleFunc("/v1/contract/{id}", app.editContractHandler).Methods("PUT")
+	mux.HandleFunc("/v1/contract/{id}", app.editContractHandler).Methods("PUT", "OPTIONS")
 	//mux.HandleFunc("/v1/tools/list", app.indexJSON)
 	mux.HandleFunc("/v1/describeContracts", app.describeHandler).Methods("GET")
 	mux.HandleFunc("/v1/aggregateContracts/{id}", app.aggregateHandler).Methods("GET")
@@ -34,6 +35,23 @@ func (app *application) routes() http.Handler {
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public", fileServer))
 
 	return mux
+}
+
+func CORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// Set headers
+		w.Header().Set("Access-Control-Allow-Headers:", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+		return
+	})
 }
 
 // Convert the notFoundResponse() helper to a http.Handler using the
