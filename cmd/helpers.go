@@ -123,7 +123,9 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, tojsonfy en
 	// Add the "Content-Type: application/json" header, then write the status code and
 	// JSON response.
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+
 	w.WriteHeader(status)
 	w.Write(js)
 

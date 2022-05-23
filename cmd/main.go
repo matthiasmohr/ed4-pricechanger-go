@@ -61,6 +61,7 @@ func main() {
 	}
 
 	// Start Server
+
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		ErrorLog:     errorLog,
