@@ -1,7 +1,9 @@
 package file
 
 import (
+	"fmt"
 	"github.com/go-gota/gota/dataframe"
+	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 )
 
@@ -9,14 +11,38 @@ type ContractModel struct {
 	DB []models.Contract
 }
 
-func (c *ContractModel) Index() (*[]models.Contract, error) {
+func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string, filters data.Filters) (*[]models.Contract, data.Metadata, error) {
 	var result []models.Contract
-	for i, v := range c.DB {
-		if i < 100 {
-			result = append(result, v)
+
+	// Filter out the result
+	for _, v := range c.DB {
+		if ProductSerialNumber == "" || ProductSerialNumber == v.ProductSerialNumber {
+			if len(ProductNames) > 0 {
+				fmt.Println("PN: ", ProductNames)
+				for _, pn := range ProductNames {
+					if v.ProductName == pn || ProductNames == nil {
+						result = append(result, v)
+					}
+				}
+			} else {
+				result = append(result, v)
+			}
 		}
 	}
-	return &result, nil
+
+	// Sort the result (offset, limit)
+	var result2 []models.Contract
+	start := filters.PageSize*filters.Page - filters.PageSize
+	stop := filters.PageSize * filters.Page
+	for i, v := range result {
+		if i >= start && i < stop {
+			result2 = append(result2, v)
+		}
+	}
+
+	metadata := data.CalculateMetadata(len(c.DB), filters.Page, filters.PageSize)
+
+	return &result2, metadata, nil
 }
 
 func (c *ContractModel) Get(id string) (*models.Contract, error) {

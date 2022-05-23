@@ -21,13 +21,6 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("/v1/aggregateContracts/{id}", app.aggregateHandler).Methods("GET")
 	mux.HandleFunc("/v1/quantileContracts/{id}", app.quantileHandler).Methods("GET")
 
-	// WEB Response
-	mux.HandleFunc("/", app.homeWebHandler)
-	mux.HandleFunc("/produktverteilung", app.produktverteilungWebHandler)
-	mux.HandleFunc("/renditenhistogramm", app.renditenhistogrammWebHandler)
-	mux.HandleFunc("/renditevspreis", app.renditevspreisWebHandler)
-	mux.HandleFunc("/renditevslaufzeit", app.renditevslaufzeitWebHandler)
-
 	// Misc
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
 

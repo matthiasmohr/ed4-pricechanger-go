@@ -3,20 +3,47 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"net/http"
 )
 
 func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := app.contracts.Index()
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
+	var input struct {
+		ProductSerialNumber string
+		ProductNames        []string
+		data.Filters
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"contracts": c}, nil)
+	//v := validator.New()
+	qs := r.URL.Query()
+
+	// Read and define the query parameters
+	input.ProductSerialNumber = app.readString(qs, "ProductSerialNumber", "")
+	input.ProductNames = app.readCSV(qs, "ProductNames", []string{})
+	input.Filters.Page = app.readInt(qs, "page", 1)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20)
+	input.Filters.Sort = app.readString(qs, "sort", "ProductSerialNumber")
+	input.Filters.SortSafelist = []string{"ProductNames", "-ProductNames", "ProductSerialNumber", "-ProductSerialNumber"}
+
+	/*
+	   if data.ValidateFilters(v, input.Filters); !v.Valid() {
+	       app.failedValidationResponse(w, r, v.Errors)
+	       return
+	   }
+	*/
+
+	c, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Send a JSON response containing the movie data.
+	err = app.writeJSON(w, http.StatusOK, envelope{"contracts": c, "metadata": metadata}, nil)
 	if err != nil {
 		app.errorLog.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }
 
