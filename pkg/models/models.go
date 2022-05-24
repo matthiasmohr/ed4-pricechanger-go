@@ -6,7 +6,7 @@ var ErrNoRecord = errors.New("models: no matching record found")
 
 type Contract struct {
 	ProductName         string // `csv:"product_name"`
-	InArea              string
+	InArea              bool
 	MbaId               string
 	ProductSerialNumber string
 	commodity           string
@@ -53,8 +53,8 @@ type Contract struct {
 }
 
 func (c *Contract) CalculateTotalPrices() {
-	c.OrigTotalCosts = c.OrigBaseCosts + c.OrigKwhCosts*c.AnnualConsumption
-	c.CurrentTotalPriceNet = c.CurrentBasePriceNet + c.CurrentKwhPriceNet*c.AnnualConsumption
-	c.TotalNewPriceProposed = c.BaseNewPriceProposed + c.KwhNewPriceProposed*c.AnnualConsumption
-	c.NewPriceTotal = c.NewPriceBase + c.NewPriceKwh*c.AnnualConsumption
+	c.OrigTotalCosts = c.OrigBaseCosts + c.OrigKwhCosts/100*c.AnnualConsumption
+	c.CurrentTotalPriceNet = c.CurrentBasePriceNet + c.CurrentKwhPriceNet/100*c.AnnualConsumption
+	c.TotalNewPriceProposed = c.BaseNewPriceProposed + c.KwhNewPriceProposed/100*c.AnnualConsumption
+	c.NewPriceTotal = c.NewPriceBase + c.NewPriceKwh/100*c.AnnualConsumption
 }

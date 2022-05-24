@@ -37,7 +37,7 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Open Database Connection
-	f, err := os.Open("dataInput/20220510 Testdata.csv")
+	f, err := os.Open("dataInput/20220524 frontEndPayload.csv")
 	if err != nil {
 		log.Fatal(err)
 	}

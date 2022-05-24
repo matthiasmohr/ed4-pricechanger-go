@@ -115,7 +115,7 @@ func (c *ContractModel) Quantile(n int, column string) ([]float64, error) {
 	df := dataframe.LoadStructs(c.DB)
 	var array []float64
 	for i := 1; i < n; i++ {
-		quantile := df.Col(column).Quantile(1 / float64(n))
+		quantile := df.Col(column).Quantile(float64(i) / float64(n))
 		array = append(array, quantile)
 	}
 

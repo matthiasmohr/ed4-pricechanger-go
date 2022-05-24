@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"net/http"
@@ -95,7 +94,6 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 
 	// Read the JSON request body data into the input struct.
 	err = app.readJSON(w, r, &input)
-	fmt.Println(err)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
