@@ -117,6 +117,35 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Request) {
+	var query struct {
+		commodity         string  `json:"NewPriceInclude"`
+		Product           string  `json:"NewPriceBase"`
+		NewPriceKwh       float64 `json:"NewPriceKwh"`
+		NewPriceStartdate string  `json:"NewPriceStartdate"`
+	}
+
+	// Read the JSON request body data into the input struct.
+	err := app.readJSON(w, r, &filter)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	cNew, err := app.contracts.UpdateMany(query)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"contract": cNew}, nil)
+	if err != nil {
+		app.errorLog.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
+}
+
+// --------- STATISTICS HANDLERS -------------
+
 func (app *application) aggregateHandler(w http.ResponseWriter, r *http.Request) {
 	aggregator, err := app.readIDStringParam(r)
 	if err != nil {

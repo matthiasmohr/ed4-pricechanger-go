@@ -32,7 +32,6 @@ type Metadata struct {
 
 func CalculateMetadata(totalRecords, page, pageSize int) Metadata {
 	if totalRecords == 0 {
-		// Note that we return an empty Metadata struct if there are no records.
 		return Metadata{}
 	}
 

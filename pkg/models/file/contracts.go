@@ -1,7 +1,6 @@
 package file
 
 import (
-	"fmt"
 	"github.com/go-gota/gota/dataframe"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
@@ -18,7 +17,6 @@ func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string,
 	for _, v := range c.DB {
 		if ProductSerialNumber == "" || ProductSerialNumber == v.ProductSerialNumber {
 			if len(ProductNames) > 0 {
-				fmt.Println("PN: ", ProductNames)
 				for _, pn := range ProductNames {
 					if v.ProductName == pn || ProductNames == nil {
 						result = append(result, v)
@@ -49,6 +47,20 @@ func (c *ContractModel) Get(id string) (*models.Contract, error) {
 	for _, v := range c.DB {
 		if v.ProductSerialNumber == id {
 			return &v, nil
+		}
+	}
+	return nil, models.ErrNoRecord
+}
+
+func (c *ContractModel) Update(d *models.Contract) (*models.Contract, error) {
+	for i, v := range c.DB {
+		if v.ProductSerialNumber == d.ProductSerialNumber {
+			c.DB[i].NewPriceInclude = d.NewPriceInclude
+			c.DB[i].NewPriceBase = d.NewPriceBase
+			c.DB[i].NewPriceKwh = d.NewPriceKwh
+			c.DB[i].NewPriceStartdate = d.NewPriceStartdate
+			c.DB[i].CalculateTotalPrices()
+			return &c.DB[i], nil
 		}
 	}
 	return nil, models.ErrNoRecord
