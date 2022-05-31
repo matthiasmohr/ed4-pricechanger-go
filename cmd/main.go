@@ -26,6 +26,7 @@ type config struct {
 
 func main() {
 	var cfg config
+	var filename string
 
 	// Load Flags
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
@@ -37,7 +38,12 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Open Database Connection
-	f, err := os.Open("dataInput/20220525 frontEndPayload.csv")
+	if cfg.env == "production" {
+		filename = "dataInput/20220531 Stage Data.csv"
+	} else {
+		filename = "dataInput/20220525 frontEndPayload.csv"
+	}
+	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +77,7 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	infoLog.Printf("Starting server on %s", srv.Addr)
+	infoLog.Printf("Starting server on %s in %s", srv.Addr, cfg.env)
 	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
