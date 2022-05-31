@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"net/http"
+	"time"
 )
 
 func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +40,6 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Send a JSON response containing the movie data.
 	err = app.writeJSON(w, http.StatusOK, envelope{"contracts": c, "metadata": metadata}, nil)
 	if err != nil {
 		app.errorLog.Println(err)
@@ -118,29 +119,93 @@ func (app *application) editContractHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Request) {
-	var query struct {
-		commodity         string  `json:"NewPriceInclude"`
-		Product           string  `json:"NewPriceBase"`
-		NewPriceKwh       float64 `json:"NewPriceKwh"`
-		NewPriceStartdate string  `json:"NewPriceStartdate"`
+	var input struct {
+		ProductSerialNumber string
+		ProductNames        []string
+		data.Filters
+		Typeofchange string
+		Change       string
+		Changebase   float64
+		Changekwh    float64
+		Changedate   string
 	}
 
-	// Read the JSON request body data into the input struct.
-	err := app.readJSON(w, r, &filter)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
+	// Adjust Input
+	input.Filters.Page = 1
+	input.Filters.PageSize = 9999999
 
-	cNew, err := app.contracts.UpdateMany(query)
+	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.Filters)
+	fmt.Println(input.ProductSerialNumber)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"contract": cNew}, nil)
+	adjusted := 0
+	for _, c := range *contracts {
+		switch input.Typeofchange {
+		case "price":
+			switch input.Change {
+			case "take":
+				c.NewPriceInclude = true
+				c.NewPriceBase = c.BaseNewPriceProposed
+				c.NewPriceKwh = c.KwhNewPriceProposed
+			case "set":
+				c.NewPriceInclude = true
+				c.NewPriceBase = input.Changebase
+				c.NewPriceKwh = input.Changekwh
+			case "add":
+				c.NewPriceInclude = true
+				c.NewPriceBase = c.NewPriceBase + input.Changebase
+				c.NewPriceKwh = c.NewPriceKwh + input.Changekwh
+			case "exclude":
+				c.NewPriceInclude = false
+			default:
+				app.serverErrorResponse(w, r, nil)
+				return
+			}
+		case "date":
+			switch input.Change {
+			case "take":
+				// TODO: Berechnen
+				c.NewPriceStartdate = time.Now().Local().AddDate(0, 2, 0).String()
+			case "set":
+				c.NewPriceStartdate = input.Changedate
+			case "add":
+				// TODO
+			default:
+				app.serverErrorResponse(w, r, nil)
+				return
+			}
+		case "communication":
+			switch input.Change {
+			default:
+				app.serverErrorResponse(w, r, nil)
+				return
+				// TODO
+			}
+		default:
+			app.serverErrorResponse(w, r, nil)
+			return
+		}
+
+		_, err := app.contracts.Update(&c)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+		}
+		adjusted = adjusted + 1
+		fmt.Println(adjusted)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"metadata": metadata, "adjusted": adjusted}, nil)
 	if err != nil {
 		app.errorLog.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }
 

@@ -38,7 +38,7 @@ func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string,
 		}
 	}
 
-	metadata := data.CalculateMetadata(len(c.DB), filters.Page, filters.PageSize)
+	metadata := data.CalculateMetadata(len(result), filters.Page, filters.PageSize)
 
 	return &result2, metadata, nil
 }
@@ -47,20 +47,6 @@ func (c *ContractModel) Get(id string) (*models.Contract, error) {
 	for _, v := range c.DB {
 		if v.ProductSerialNumber == id {
 			return &v, nil
-		}
-	}
-	return nil, models.ErrNoRecord
-}
-
-func (c *ContractModel) Update(d *models.Contract) (*models.Contract, error) {
-	for i, v := range c.DB {
-		if v.ProductSerialNumber == d.ProductSerialNumber {
-			c.DB[i].NewPriceInclude = d.NewPriceInclude
-			c.DB[i].NewPriceBase = d.NewPriceBase
-			c.DB[i].NewPriceKwh = d.NewPriceKwh
-			c.DB[i].NewPriceStartdate = d.NewPriceStartdate
-			c.DB[i].CalculateTotalPrices()
-			return &c.DB[i], nil
 		}
 	}
 	return nil, models.ErrNoRecord

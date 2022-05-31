@@ -12,6 +12,7 @@ func (app *application) routes() http.Handler {
 	// JSON response
 	//mux.HandleFunc("/v1/products", app.createKreditangebotHandler).Methods("POST")
 	mux.HandleFunc("/v1/contracts", app.indexContractsHandler)
+	mux.HandleFunc("/v1/updatecontracts", app.editContractsHandler).Methods("PUT", "OPTIONS")
 	//mux.HandleFunc("/v1/tools/new", app.createToolForm)
 	//mux.HandleFunc("/v1/tools/{id}", app.deleteTool).Methods("DELETE")
 	mux.HandleFunc("/v1/contract/{id}", app.showContractHandler).Methods("GET")
