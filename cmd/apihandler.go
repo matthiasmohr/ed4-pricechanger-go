@@ -140,7 +140,6 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 	input.Filters.PageSize = 9999999
 
 	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.Filters)
-	fmt.Println(input.ProductSerialNumber)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
