@@ -10,7 +10,7 @@ type ContractModel struct {
 	DB []models.Contract
 }
 
-func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string, filters data.Filters) (*[]models.Contract, data.Metadata, error) {
+func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string, NewPriceInclude string, filters data.Filters) (*[]models.Contract, data.Metadata, error) {
 	var result []models.Contract
 
 	// Filter out the result
@@ -19,11 +19,39 @@ func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string,
 			if len(ProductNames) > 0 {
 				for _, pn := range ProductNames {
 					if v.ProductName == pn || ProductNames == nil {
-						result = append(result, v)
+						switch NewPriceInclude {
+						case "":
+							result = append(result, v)
+							break
+						case "true":
+							if v.NewPriceInclude == true {
+								result = append(result, v)
+							}
+							break
+						case "false":
+							if v.NewPriceInclude == false {
+								result = append(result, v)
+							}
+							break
+						}
 					}
 				}
 			} else {
-				result = append(result, v)
+				switch NewPriceInclude {
+				case "":
+					result = append(result, v)
+					break
+				case "true":
+					if v.NewPriceInclude == true {
+						result = append(result, v)
+					}
+					break
+				case "false":
+					if v.NewPriceInclude == false {
+						result = append(result, v)
+					}
+					break
+				}
 			}
 		}
 	}
@@ -65,6 +93,8 @@ func (c *ContractModel) Update(d *models.Contract) (*models.Contract, error) {
 	}
 	return nil, models.ErrNoRecord
 }
+
+// ---- STATISTICS -----
 
 func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, map[string][]interface{}, error) {
 	df := dataframe.LoadStructs(c.DB)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"net/http"
@@ -13,6 +12,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 	var input struct {
 		ProductSerialNumber string
 		ProductNames        []string
+		NewPriceInclude     string
 		data.Filters
 	}
 
@@ -22,6 +22,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 	// Read and define the query parameters
 	input.ProductSerialNumber = app.readString(qs, "ProductSerialNumber", "")
 	input.ProductNames = app.readCSV(qs, "ProductNames", []string{})
+	input.NewPriceInclude = app.readString(qs, "NewPriceInclude", "")
 	input.Filters.Page = app.readInt(qs, "page", 1)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20)
 	input.Filters.Sort = app.readString(qs, "sort", "ProductSerialNumber")
@@ -34,7 +35,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 	   }
 	*/
 
-	c, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.Filters)
+	c, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.NewPriceInclude, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -139,7 +140,7 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 	input.Filters.Page = 1
 	input.Filters.PageSize = 9999999
 
-	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.Filters)
+	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, "", input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -172,7 +173,7 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 			switch input.Change {
 			case "take":
 				// TODO: Berechnen
-				c.NewPriceStartdate = time.Now().Local().AddDate(0, 2, 0).String()
+				c.NewPriceStartdate = time.Now().Local().AddDate(0, 2, 0).Format("2006-01-02")
 			case "set":
 				c.NewPriceStartdate = input.Changedate
 			case "add":
@@ -198,7 +199,6 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 			app.serverErrorResponse(w, r, err)
 		}
 		adjusted = adjusted + 1
-		fmt.Println(adjusted)
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"metadata": metadata, "adjusted": adjusted}, nil)
@@ -210,7 +210,7 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 
 // --------- STATISTICS HANDLERS -------------
 
-func (app *application) aggregateHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) aggregateContractsHandler(w http.ResponseWriter, r *http.Request) {
 	aggregator, err := app.readIDStringParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
@@ -233,7 +233,7 @@ func (app *application) aggregateHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (app *application) describeHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) describeContractsHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := app.contracts.Describe()
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -246,7 +246,7 @@ func (app *application) describeHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (app *application) quantileHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) quantileContractsHandler(w http.ResponseWriter, r *http.Request) {
 	kpi, err := app.readIDStringParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
