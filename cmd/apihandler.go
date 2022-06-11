@@ -217,7 +217,11 @@ func (app *application) aggregateContractsHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	c, t, err := app.contracts.Aggregate(aggregator)
+	// Read params
+	qs := r.URL.Query()
+	groupby := app.readString(qs, "groupby", "ProductName")
+
+	c, t, err := app.contracts.Aggregate(groupby, aggregator)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFoundResponse(w, r)

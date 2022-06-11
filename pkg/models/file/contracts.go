@@ -96,9 +96,9 @@ func (c *ContractModel) Update(d *models.Contract) (*models.Contract, error) {
 
 // ---- STATISTICS -----
 
-func (c *ContractModel) Aggregate(aggregator string) ([]map[string]interface{}, map[string][]interface{}, error) {
+func (c *ContractModel) Aggregate(groupby string, aggregator string) ([]map[string]interface{}, map[string][]interface{}, error) {
 	df := dataframe.LoadStructs(c.DB)
-	groups := df.GroupBy("ProductName")
+	groups := df.GroupBy(groupby)
 	aggre := groups.Aggregation([]dataframe.AggregationType{
 		dataframe.Aggregation_MAX,
 		dataframe.Aggregation_MEAN,
