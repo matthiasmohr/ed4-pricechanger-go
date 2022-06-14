@@ -3,9 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gocarina/gocsv"
-	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
-	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models/file"
+	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models/db"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +14,8 @@ import (
 type application struct {
 	errorLog  *log.Logger
 	infoLog   *log.Logger
-	contracts *file.ContractModel
+	contracts *db.ContractModel
+	db        *gorm.DB
 	config    config
 }
 
@@ -26,7 +26,6 @@ type config struct {
 
 func main() {
 	var cfg config
-	var filename string
 
 	// Load Flags
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
@@ -37,37 +36,18 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	// Open Database Connection
-	if cfg.env == "production" {
-		filename = "dataInput/20220531 Stage Data.csv"
-	} else {
-		filename = "dataInput/20220525 frontEndPayload.csv"
-	}
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	// Parse File into Contract Slice and Calculate Total Prices
-	var contractDB []models.Contract
-	if err := gocsv.UnmarshalFile(f, &contractDB); err != nil {
-		panic(err)
-	}
-	for i, _ := range contractDB {
-		contractDB[i].CalculateTotalPrices()
-	}
+	var database = db.Init()
 
 	// Start App
 	app := &application{
-		config:    cfg,
-		errorLog:  errorLog,
-		infoLog:   infoLog,
-		contracts: &file.ContractModel{DB: contractDB},
+		config:   cfg,
+		errorLog: errorLog,
+		infoLog:  infoLog,
+		//contracts: &file.ContractModel{DB: contractDB},
+		contracts: &db.ContractModel{DB: database},
 	}
 
 	// Start Server
-
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		ErrorLog:     errorLog,
@@ -78,6 +58,6 @@ func main() {
 	}
 
 	infoLog.Printf("Starting server on %s in %s", srv.Addr, cfg.env)
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
 }

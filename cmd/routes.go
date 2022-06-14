@@ -24,6 +24,7 @@ func (app *application) routes() http.Handler {
 
 	// Misc
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
+	mux.HandleFunc("/v1/databasereset", app.databaseReset).Methods("POST", "OPTIONS")
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public", fileServer))

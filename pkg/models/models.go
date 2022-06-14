@@ -1,15 +1,20 @@
 package models
 
-import "errors"
+import (
+	"errors"
+	"gorm.io/gorm"
+)
 
 var ErrNoRecord = errors.New("models: no matching record found")
 
 type Contract struct {
-	ProductName         string // `csv:"product_name"`
+	gorm.Model `dataframe:"-"`
+
+	ProductName         string `gorm:"index"`
 	InArea              bool
 	MbaId               string
-	ProductSerialNumber string
-	commodity           string
+	ProductSerialNumber string `gorm:"unique, index"`
+	Commodity           string `gorm:"index" csv:"commodity"`
 
 	// Contract terms
 	AnnualConsumption float64
@@ -45,11 +50,11 @@ type Contract struct {
 	TotalNewPriceProposed float64
 
 	// Price Change info
-	NewPriceInclude   bool
+	NewPriceInclude   bool `gorm:"index"`
 	NewPriceBase      float64
 	NewPriceKwh       float64
 	NewPriceTotal     float64
-	NewPriceStartdate string // date
+	NewPriceStartdate string `gorm:"index"` // date
 }
 
 func (c *Contract) CalculateTotalPrices() {

@@ -13,6 +13,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 		ProductSerialNumber string
 		ProductNames        []string
 		NewPriceInclude     string
+		Commodity           string
 		data.Filters
 	}
 
@@ -23,6 +24,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 	input.ProductSerialNumber = app.readString(qs, "ProductSerialNumber", "")
 	input.ProductNames = app.readCSV(qs, "ProductNames", []string{})
 	input.NewPriceInclude = app.readString(qs, "NewPriceInclude", "")
+	input.Commodity = app.readString(qs, "Commodity", "")
 	input.Filters.Page = app.readInt(qs, "page", 1)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20)
 	input.Filters.Sort = app.readString(qs, "sort", "ProductSerialNumber")
@@ -35,7 +37,7 @@ func (app *application) indexContractsHandler(w http.ResponseWriter, r *http.Req
 	   }
 	*/
 
-	c, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.NewPriceInclude, input.Filters)
+	c, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, input.NewPriceInclude, input.Commodity, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -140,7 +142,7 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 	input.Filters.Page = 1
 	input.Filters.PageSize = 9999999
 
-	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, "", input.Filters)
+	contracts, metadata, err := app.contracts.Index(input.ProductSerialNumber, input.ProductNames, "", "", input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -220,8 +222,9 @@ func (app *application) aggregateContractsHandler(w http.ResponseWriter, r *http
 	// Read params
 	qs := r.URL.Query()
 	groupby := app.readString(qs, "groupby", "ProductName")
+	commodity := app.readString(qs, "Commodity", "")
 
-	c, t, err := app.contracts.Aggregate(groupby, aggregator)
+	c, t, err := app.contracts.Aggregate(groupby, aggregator, commodity)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFoundResponse(w, r)
@@ -238,7 +241,11 @@ func (app *application) aggregateContractsHandler(w http.ResponseWriter, r *http
 }
 
 func (app *application) describeContractsHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := app.contracts.Describe()
+	// Read params
+	qs := r.URL.Query()
+	commodity := app.readString(qs, "Commodity", "")
+
+	c, err := app.contracts.Describe(commodity)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -257,12 +264,30 @@ func (app *application) quantileContractsHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	c, err := app.contracts.Quantile(100, kpi)
+	// Read params
+	qs := r.URL.Query()
+	commodity := app.readString(qs, "Commodity", "")
+
+	c, err := app.contracts.Quantile(100, kpi, commodity)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"quantile": c}, nil)
+	if err != nil {
+		app.errorLog.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
+}
+
+// --------- DATABASE  -------------
+func (app *application) databaseReset(w http.ResponseWriter, r *http.Request) {
+	err := app.contracts.Reset(app.config.env)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"Reset executed. Errors:": err}, nil)
 	if err != nil {
 		app.errorLog.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
