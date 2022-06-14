@@ -155,7 +155,7 @@ func (c *ContractModel) Quantile(n int, column string, commodity string) ([]floa
 func Init(env string) *gorm.DB {
 	var dsn string
 	if env == "production" {
-		dsn = "host=ec2-52-72-56-59.compute-1.amazonaws.com user=bkctbapxeeddmq password=73309a32852b2457f074bb14e65a28d67239a762471da1053bba59a0c912cfa3 dbname=ddp7q4qn5eseu9 port=5432 sslmode=disable TimeZone=Europe/Berlin"
+		dsn = "host=ec2-52-72-56-59.compute-1.amazonaws.com user=bkctbapxeeddmq password=73309a32852b2457f074bb14e65a28d67239a762471da1053bba59a0c912cfa3 dbname=ddp7q4qn5eseu9 port=5432 sslmode=enable TimeZone=Europe/Berlin"
 	} else {
 		dsn = "host=localhost user=postgres password=q1alfa147 dbname=ed4-pricechanger port=5432 sslmode=disable TimeZone=Europe/Berlin"
 	}
