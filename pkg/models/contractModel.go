@@ -50,11 +50,14 @@ type Contract struct {
 	TotalNewPriceProposed float64
 
 	// Price Change info
-	NewPriceInclude   bool `gorm:"index"`
-	NewPriceBase      float64
-	NewPriceKwh       float64
-	NewPriceTotal     float64
-	NewPriceStartdate string `gorm:"index"` // date
+	NewPriceInclude      bool `gorm:"index"`
+	NewPriceBase         float64
+	NewPriceKwh          float64
+	NewPriceTotal        float64
+	NewPriceStartdate    string `gorm:"index"` // date
+	CommunicationChannel string
+	CommunicationDate1   string
+	CommunicationDate2   string
 }
 
 func (c *Contract) CalculateTotalPrices() {
@@ -62,4 +65,16 @@ func (c *Contract) CalculateTotalPrices() {
 	c.CurrentTotalPriceNet = c.CurrentBasePriceNet + c.CurrentKwhPriceNet/100*c.AnnualConsumption
 	c.TotalNewPriceProposed = c.BaseNewPriceProposed + c.KwhNewPriceProposed/100*c.AnnualConsumption
 	c.NewPriceTotal = c.NewPriceBase + c.NewPriceKwh/100*c.AnnualConsumption
+}
+
+func (c *Contract) CalculateCommunicationDates(Allatonce bool, AllatonceDate string, Beforechange bool, Beforechangedays int) {
+	Beforechangedate := c.NewPriceStartdate
+	if Allatonce && Beforechange {
+		c.CommunicationDate1 = AllatonceDate
+		c.CommunicationDate2 = Beforechangedate
+	} else if Allatonce {
+		c.CommunicationDate1 = AllatonceDate
+	} else if Beforechange {
+		c.CommunicationDate1 = Beforechangedate
+	}
 }

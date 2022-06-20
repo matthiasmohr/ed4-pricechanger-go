@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"github.com/go-gota/gota/dataframe"
 	"github.com/gocarina/gocsv"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/data"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
@@ -10,10 +9,12 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"sync"
 )
 
 type ContractModel struct {
-	DB *gorm.DB
+	mutex sync.Mutex
+	DB    *gorm.DB
 }
 
 func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string, NewPriceInclude string, Commodity string, filters data.Filters) (*[]models.Contract, data.Metadata, error) {
@@ -27,7 +28,7 @@ func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string,
 		Where(&models.Contract{ProductSerialNumber: ProductSerialNumber}).
 		Where(&models.Contract{Commodity: Commodity})
 	// Iterate ProductNames in Query
-	if len(ProductNames) > 0 {
+	if len(ProductNames) > 0 && len(ProductNames[0]) > 0 {
 		result = result.Where("product_name IN ?", ProductNames)
 	}
 	// Check if included in new prices
@@ -82,72 +83,15 @@ func (c *ContractModel) Get(id string) (*models.Contract, error) {
 }
 
 func (c *ContractModel) Update(contract *models.Contract) (*models.Contract, error) {
+	// Mutex für parallele Bearbeitung
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	result := c.DB.Save(contract)
 	if result.Error != nil {
 		fmt.Println(result.Error)
 		return nil, result.Error
 	}
 	return contract, nil
-}
-
-// ---- STATISTICS -----
-
-func (c *ContractModel) Aggregate(groupby string, aggregator string, commodity string) ([]map[string]interface{}, map[string][]interface{}, error) {
-	allcontracts, _, _ := c.Index("", nil, "", commodity, data.Filters{PageSize: 999999})
-	df := dataframe.LoadStructs(*allcontracts)
-	groups := df.GroupBy(groupby)
-	aggre := groups.Aggregation([]dataframe.AggregationType{
-		dataframe.Aggregation_MAX,
-		dataframe.Aggregation_MEAN,
-		dataframe.Aggregation_MIN,
-		dataframe.Aggregation_COUNT},
-		[]string{aggregator, aggregator, aggregator, aggregator})
-	outputMap := aggre.Maps()
-
-	// Rename Keys for Client simplicity purpose
-	for i, _ := range outputMap {
-		outputMap[i]["COUNT"] = outputMap[i][aggregator+"_COUNT"]
-		outputMap[i]["MAX"] = outputMap[i][aggregator+"_MAX"]
-		outputMap[i]["MEAN"] = outputMap[i][aggregator+"_MEAN"]
-		outputMap[i]["MIN"] = outputMap[i][aggregator+"_MIN"]
-	}
-
-	// Transpose records and convert to map of Type
-	records := aggre.Records()
-	transposedVectors := make(map[string][]interface{})
-	for i := 0; i < len(records[0]); i++ {
-		for k := 0; k < len(records); k++ {
-			if k != 0 {
-				transposedVectors[records[0][i]] = append(transposedVectors[records[0][i]], records[k][i])
-			}
-		}
-	}
-
-	// TODO: Error Catching
-	return outputMap, transposedVectors, nil
-}
-
-func (c *ContractModel) Describe(commodity string) ([]map[string]interface{}, error) {
-	allcontracts, _, _ := c.Index("", nil, "", commodity, data.Filters{PageSize: 999999})
-	df := dataframe.LoadStructs(*allcontracts)
-	dfDescribe := df.Describe()
-	outputMap := dfDescribe.Maps()
-
-	// TODO: Error Catching
-	return outputMap, nil
-}
-
-func (c *ContractModel) Quantile(n int, column string, commodity string) ([]float64, error) {
-	allcontracts, _, _ := c.Index("", nil, "", commodity, data.Filters{PageSize: 999999})
-	df := dataframe.LoadStructs(*allcontracts)
-	var array []float64
-	for i := 1; i < n; i++ {
-		quantile := df.Col(column).Quantile(float64(i) / float64(n))
-		array = append(array, quantile)
-	}
-
-	// TODO: Error Catching
-	return array, nil
 }
 
 // ---- DATABASE -----
@@ -161,6 +105,18 @@ func Init(env string) *gorm.DB {
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	sqlDB, err := db.DB()
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	sqlDB.SetMaxIdleConns(1)
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	sqlDB.SetMaxOpenConns(2)
+
+	//Test the database
+	err = sqlDB.Ping()
 	if err != nil {
 		log.Fatalln(err)
 	}
