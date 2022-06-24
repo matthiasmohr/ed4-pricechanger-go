@@ -19,12 +19,8 @@ type ContractModel struct {
 
 func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string, NewPriceInclude string, Commodity string, filters data.Filters) (*[]models.Contract, data.Metadata, error) {
 	var contracts = []models.Contract{}
-
 	// State base query
 	result := c.DB.
-		Limit(filters.PageSize).
-		Offset(filters.PageSize*filters.Page - filters.PageSize).
-		Order("product_serial_number").
 		Where(&models.Contract{ProductSerialNumber: ProductSerialNumber}).
 		Where(&models.Contract{Commodity: Commodity})
 	// Iterate ProductNames in Query
@@ -41,34 +37,26 @@ func (c *ContractModel) Index(ProductSerialNumber string, ProductNames []string,
 		break
 	}
 
-	// Execute query and check for errors
-	result = result.Find(&contracts)
-	if result.Error != nil {
+	// Execute query and check for errors, include Limit and Offset
+	list := result.
+		Limit(filters.PageSize).
+		Offset(filters.PageSize*filters.Page - filters.PageSize).
+		Order("product_serial_number").
+		Find(&contracts)
+	if list.Error != nil {
 		fmt.Println(result.Error)
 		return nil, data.Metadata{}, result.Error
 	}
 
 	// Count the numbers
 	var amount int64
-	count := c.DB.Model(&models.Contract{}).
-		Where(&models.Contract{ProductSerialNumber: ProductSerialNumber}).
-		Where(&models.Contract{Commodity: Commodity})
-	// Iterate ProductNames in Query
-	if len(ProductNames) > 0 {
-		count = count.Where("product_name IN ?", ProductNames)
+	count := result.Count(&amount)
+	if count.Error != nil {
+		fmt.Println(result.Error)
+		return nil, data.Metadata{}, result.Error
 	}
-	switch NewPriceInclude {
-	case "false":
-		count = count.Where(map[string]interface{}{"new_price_include": false})
-		break
-	case "true":
-		count = count.Where(&models.Contract{NewPriceInclude: true})
-		break
-	}
-	result = result.Count(&amount)
 
 	metadata := data.CalculateMetadata(int(amount), filters.Page, filters.PageSize)
-
 	return &contracts, metadata, nil
 }
 
@@ -101,7 +89,7 @@ func Init(env string) *gorm.DB {
 	if env == "production" {
 		dsn = "host=ec2-52-72-56-59.compute-1.amazonaws.com user=bkctbapxeeddmq password=73309a32852b2457f074bb14e65a28d67239a762471da1053bba59a0c912cfa3 dbname=ddp7q4qn5eseu9 port=5432 sslmode=require TimeZone=Europe/Berlin"
 	} else {
-		dsn = "host=localhost user=postgres password=q1alfa147 dbname=ed4-pricechanger port=5432 sslmode=disable TimeZone=Europe/Berlin"
+		dsn = "host=localhost user=postgres password=q1alfa147 dbname=matthiasmohr port=5432 sslmode=disable TimeZone=Europe/Berlin"
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -125,7 +113,6 @@ func Init(env string) *gorm.DB {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	return db
 }
 
