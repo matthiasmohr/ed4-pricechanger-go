@@ -121,7 +121,7 @@ func Init(env string) *gorm.DB {
 		log.Fatalln(err)
 	}
 
-	err = db.AutoMigrate(&models.Contract{})
+	err = db.AutoMigrate(&models.Contract{}, &models.Adjustment{})
 	if err != nil {
 		log.Fatalln(err)
 	}

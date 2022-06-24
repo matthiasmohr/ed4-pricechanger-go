@@ -41,14 +41,16 @@ func (app *application) describeContractsHandler(w http.ResponseWriter, r *http.
 	qs := r.URL.Query()
 	commodity := app.readString(qs, "Commodity", "")
 
-	c, err := app.contracts.Describe(commodity)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
+	c := app.describeBuffer[commodity]
+	if c == nil {
+		app.notFoundResponse(w, r)
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"describeContracts": c}, nil)
+	go app.DescribeContractsBufferRenew()
+
+	err := app.writeJSON(w, http.StatusOK, envelope{"describeContracts": c}, nil)
 	if err != nil {
-		app.errorLog.Println(err)
+		app.logError(r, err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
 	}
 }

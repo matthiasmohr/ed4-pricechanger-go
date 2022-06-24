@@ -12,11 +12,12 @@ import (
 )
 
 type application struct {
-	errorLog  *log.Logger
-	infoLog   *log.Logger
-	contracts *db.ContractModel
-	db        *gorm.DB
-	config    config
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	contracts      *db.ContractModel
+	db             *gorm.DB
+	config         config
+	describeBuffer map[string][]map[string]interface{}
 }
 
 type config struct {
@@ -44,8 +45,11 @@ func main() {
 		errorLog: errorLog,
 		infoLog:  infoLog,
 		//contracts: &file.ContractModel{DB: contractDB},
-		contracts: &db.ContractModel{DB: database},
+		contracts:      &db.ContractModel{DB: database},
+		describeBuffer: make(map[string][]map[string]interface{}),
 	}
+
+	app.DescribeContractsBufferRenew()
 
 	// Start Server
 	srv := &http.Server{

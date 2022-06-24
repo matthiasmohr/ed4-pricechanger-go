@@ -195,3 +195,15 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, tojsonfy en
 
 	return nil
 }
+
+func (app *application) DescribeContractsBufferRenew() error {
+	commodities := []string{"", "power", "gas"}
+	for _, c := range commodities {
+		d, err := app.contracts.Describe(c)
+		if err != nil {
+			return err
+		}
+		app.describeBuffer[c] = d
+	}
+	return nil
+}
