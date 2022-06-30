@@ -37,7 +37,8 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	var database = db.Init(cfg.env)
+	var database = db.Init(cfg.r
+	env)
 
 	// Start App
 	app := &application{

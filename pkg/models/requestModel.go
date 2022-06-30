@@ -13,6 +13,8 @@ var Pricechangerequest struct {
 	Commodity                   string
 	ExcludeSOS                  bool
 	ExcludeSOSFrom              string
+	ExcludeContractduration     bool
+	ExcludeContractdurationDays int
 	ExcludeTermination          bool
 	ExcludeTerminationFrom      string
 	ExcludeProductchange        bool
@@ -27,8 +29,6 @@ var Pricechangerequest struct {
 	LimitToFactor               bool
 	LimitToFactorMin            float64
 	LimitToFactorMax            float64
-	LimitToContractduration     bool
-	LimitToContractdurationDays int
 
 	Changedate string
 

@@ -2,7 +2,9 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
+	"time"
 )
 
 var ErrNoRecord = errors.New("models: no matching record found")
@@ -68,13 +70,17 @@ func (c *Contract) CalculateTotalPrices() {
 }
 
 func (c *Contract) CalculateCommunicationDates(Allatonce bool, AllatonceDate string, Beforechange bool, Beforechangedays int) {
-	Beforechangedate := c.NewPriceStartdate
+	NewPriceStartdateDate, err := time.Parse("2006-01-02", c.NewPriceStartdate)
+	if err != nil {
+		fmt.Println("Fehler bei der Datumsberechnung: ", err)
+	}
+	Beforechangedate := NewPriceStartdateDate.AddDate(0, 0, -Beforechangedays)
 	if Allatonce && Beforechange {
 		c.CommunicationDate1 = AllatonceDate
-		c.CommunicationDate2 = Beforechangedate
+		c.CommunicationDate2 = Beforechangedate.Format("2006-01-02")
 	} else if Allatonce {
 		c.CommunicationDate1 = AllatonceDate
 	} else if Beforechange {
-		c.CommunicationDate1 = Beforechangedate
+		c.CommunicationDate1 = Beforechangedate.Format("2006-01-02")
 	}
 }

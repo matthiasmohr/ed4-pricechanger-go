@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/matthiasmohr/ed4-pricechanger-go/pkg/models"
 	"net/http"
 	"time"
@@ -30,12 +31,30 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 	adjusted := 0
 	for _, c := range *contracts {
 		// Check for Exclusion reasons
-		if c.StartDate < input.ExcludeProductchangeFrom {
-			c.NewPriceInclude = false
-			continue
+		if input.ExcludeSOS == true {
+			// TODO: Parse Dates
+			if c.StartDate < input.ExcludeSOSFrom {
+				c.NewPriceInclude = false
+				continue
+			}
+		}
+		// Check for Contract Lifetime
+		if input.ExcludeContractduration == true {
+			contractStartDateDate, err := time.Parse("2006-01-02", c.StartDate)
+			if err != nil {
+				fmt.Println("Fehler bei der Datumsberechnung: ", err)
+			}
+			today := time.Now().Local().AddDate(0, 2, 0)
+			contractDays := int(today.Sub(contractStartDateDate).Hours() / 24)
+			if input.ExcludeContractdurationDays > contractDays {
+				c.NewPriceInclude = false
+				continue
+			}
 		}
 		// Add termination date comparison
+		// TODO
 		// Add Product Change date comparison
+		// TODO
 		switch input.Typeofchange {
 		case "price":
 			switch input.Change {
@@ -84,6 +103,7 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 				}
 			}
 			if input.LimitToFactor == true {
+				// TODO: Check
 				if c.NewPriceKwh > (c.CurrentKwhPriceNet * float64(input.LimitToFactorMax/100)) {
 					c.NewPriceKwh = c.CurrentKwhPriceNet * float64(input.LimitToFactorMax/100)
 				}
@@ -97,16 +117,9 @@ func (app *application) editContractsHandler(w http.ResponseWriter, r *http.Requ
 					c.NewPriceBase = c.CurrentBasePriceNet * float64(input.LimitToFactorMin/100)
 				}
 			}
-			if input.LimitToContractduration == true {
-				if input.LimitToContractdurationDays > 1 {
-					c.NewPriceInclude = false
-					// TODO: Calculate contract duration
-				}
-			}
 		case "date":
 			switch input.Change {
 			case "take":
-				// TODO: Berechnen
 				c.NewPriceStartdate = time.Now().Local().AddDate(0, 2, 0).Format("2006-01-02")
 			case "set":
 				c.NewPriceStartdate = input.Changedate
