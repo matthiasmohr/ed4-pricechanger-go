@@ -10,8 +10,15 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.49.16 // indirect
+	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/go-chi/chi/v5 v5.0.11 // indirect
+	github.com/go-chi/cors v1.2.1 // indirect
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
+	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
+	github.com/guregu/dynamo v1.21.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.12.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -22,11 +29,13 @@ require (
 	github.com/jackc/pgx/v4 v4.16.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.13 // indirect
 	github.com/montanaflynn/stats v0.6.6 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
 	gorm.io/driver/postgres v1.3.7 // indirect
 	gorm.io/driver/sqlite v1.3.4 // indirect
