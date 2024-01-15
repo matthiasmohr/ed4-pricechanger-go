@@ -23,7 +23,7 @@ func InterfaceToModel(data interface{}) (instance *Contract, err error) {
 }
 
 func (c *Contract) GetFilterId() map[string]interface{} {
-	return map[string]interface{}{"id": c.ID.String()}
+	return map[string]interface{}{"_id": c.ID.String()}
 }
 
 func (c *Contract) TableName() string {
@@ -53,18 +53,18 @@ func ParseDynamoAttributeToStruct(response map[string]*dynamodb.AttributeValue) 
 			if c.ID == uuid.Nil {
 				err = errors.New("Item not found")
 			}
-			if key == "name" {
-				c.Name = *value.S
-			}
-			if key == "createdAt" {
-				c.CreatedAt, err = time.Parse(entities.GetTimeFormat(), *value.S)
-			}
-			if key == "updatedAt" {
-				c.UpdatedAt, err = time.Parse(entities.GetTimeFormat(), *value.S)
-			}
-			if err != nil {
-				return c, err
-			}
+		}
+		if key == "name" {
+			c.Name = *value.S
+		}
+		if key == "createdAt" {
+			c.CreatedAt, err = time.Parse(entities.GetTimeFormat(), *value.S)
+		}
+		if key == "updatedAt" {
+			c.UpdatedAt, err = time.Parse(entities.GetTimeFormat(), *value.S)
+		}
+		if err != nil {
+			return c, err
 		}
 	}
 

@@ -41,7 +41,6 @@ func (c *Controller) ListAll() (entities []contract.Contract, err error) {
 
 	filter := expression.Name("name").NotEqual(expression.Value(""))
 	condition, err := expression.NewBuilder().WithFilter(filter).Build()
-
 	if err != nil {
 		return entities, err
 	}
