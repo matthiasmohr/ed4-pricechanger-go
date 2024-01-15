@@ -84,14 +84,14 @@ func (h *Handler) Put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productBody, err := h.getBodyAndValidate(r, ID)
+	contractBody, err := h.getBodyAndValidate(r, ID)
 
 	if err != nil {
 		httpStatus.StatusBadRequest(w, r, err)
 		return
 	}
 
-	if err := h.Controller.Update(ID, productBody); err != nil {
+	if err := h.Controller.Update(ID, contractBody); err != nil {
 		httpStatus.StatusInternalServerError(w, r, err)
 		return
 	}
@@ -121,6 +121,7 @@ func (h *Handler) Options(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getBodyAndValidate(r *http.Request, ID uuid.UUID) (*EntityContract.Contract, error) {
 	contractBody := &EntityContract.Contract{}
 	body, err := h.Rules.ConvertIoReaderToStruct(r.Body, contractBody)
+
 	if err != nil {
 		return &EntityContract.Contract{}, errors.New("body is required")
 	}

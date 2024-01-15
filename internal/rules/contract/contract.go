@@ -51,7 +51,7 @@ func (r *Rules) Validate(model interface{}) error {
 
 	return Validation.ValidateStruct(contractModel,
 		Validation.Field(&contractModel.ID, Validation.Required, is.UUIDv4),
-		Validation.Field(contractModel.Name, Validation.Required, Validation.Length(3, 50)),
+		Validation.Field(&contractModel.Name, Validation.Required, Validation.Length(3, 50)),
 	)
 }
 

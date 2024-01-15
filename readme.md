@@ -15,3 +15,6 @@ Dataframe Examples
 ```
 https://morioh.com/p/35560c47de92
 ```
+
+Derived from
+https://github.com/AkhilSharma90/BulletProof-DynamoDB-GO
