@@ -68,7 +68,7 @@ func (r *Rules) createTable(connection *dynamodb.DynamoDB) error {
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
 				AttributeName: aws.String("_id"),
-				KeyType:       aws.String("S"),
+				KeyType:       aws.String("HASH"),
 			},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{

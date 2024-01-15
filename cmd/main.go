@@ -6,7 +6,7 @@ import (
 	"github.com/matthiasmohr/ed4-pricechanger-go/config"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/repository/adapter"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/repository/instance"
-	"github.com/matthiasmohr/ed4-pricechanger-go/internal/routes/"
+	"github.com/matthiasmohr/ed4-pricechanger-go/internal/routes"
 	"github.com/matthiasmohr/ed4-pricechanger-go/internal/rules"
 	RulesContract "github.com/matthiasmohr/ed4-pricechanger-go/internal/rules/contract"
 	"github.com/matthiasmohr/ed4-pricechanger-go/utils/logger"

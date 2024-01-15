@@ -50,7 +50,7 @@ func (r *Router) RouterHealth(repository adapter.Interface) {
 
 func (r *Router) RouterContract(repository adapter.Interface) {
 	handler := ContractHandler.NewHandler(repository)
-	r.router.Route("/product", func(route chi.Router) {
+	r.router.Route("/contract", func(route chi.Router) {
 		route.Post("/", handler.Post)
 		route.Get("/", handler.Get)
 		route.Get("/{ID}", handler.Get)

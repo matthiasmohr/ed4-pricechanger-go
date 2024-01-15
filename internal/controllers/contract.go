@@ -64,6 +64,7 @@ func (c *Controller) ListAll() (entities []contract.Contract, err error) {
 }
 func (c *Controller) Create(entity *contract.Contract) (uuid.UUID, error) {
 	entity.CreatedAt = time.Now()
+	entity.ID = uuid.New()
 	_, err := c.repository.CreateOrUpdate(entity.GetMap(), entity.TableName())
 	return entity.ID, err
 }
