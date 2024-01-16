@@ -72,8 +72,8 @@ func (r *Rules) createTable(connection *dynamodb.DynamoDB) error {
 			},
 		},
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits:  aws.Int64(10),
-			WriteCapacityUnits: aws.Int64(10),
+			ReadCapacityUnits:  aws.Int64(3),
+			WriteCapacityUnits: aws.Int64(3),
 		},
 		TableName: aws.String(table.TableName()),
 	}
